@@ -11,7 +11,6 @@ readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
 readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
 readonly EPOCH=$1
 
-
 usage() {
 	local summary='Convert epoch time to a human-readable timestamp.'
 	local args='<TIMESTAMP> [-h] [-d]'
@@ -26,17 +25,6 @@ usage() {
 	exit -1
 }
 
-parse_args() {
-	while getopts ":hd" opt; do
-		case ${opt} in
-			d ) set -x ;;
-			h ) usage ;;
-			\? ) usage "Invalid option: -$OPTARG" ;;
-		esac
-	done
-	shift $((OPTIND-1))
-}
-
 main() {
 	local epochConformedStr=${EPOCH}
 	local len=${#EPOCH}
@@ -44,7 +32,7 @@ main() {
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
 	_set_colors
-	parse_args "${ARGS[@]}"
+	_parse_args "${ARGS[@]}"
 	# Note: Only use the first 10 char! `date -d @epochTime` outputs an
 	# incorrect timestamp for any string longer than 10 char
 	if (( len > 10 )); then
