@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+##
+# xx
+#
+# Create scratchwork file of the specified type in /tmp/
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+readonly FILETYPE=$1
+
+usage() {
+	local summary="Create scratchwork file of the specified type in /tmp/"
+	local args='[FILETYPE] [-h] [-d]'
+	local options=(
+		"FILETYPE: Filetype. Optional. If no arg is passed, file will have \
+			no extension."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+main() {
+	local name='/tmp/temp'
+
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	_parse_args "${ARGS[@]}"
+	if [[ -n ${FILETYPE} ]]; then
+		file="${file}.${FILETYPE}"
+	fi
+	>"${name}"
+	vim "${name}"
+}
+main
