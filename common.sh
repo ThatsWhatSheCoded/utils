@@ -72,6 +72,17 @@ _null_var() {
 	echo "${RED}ERROR/EXIT: Variable in $1() cannot be null!${NC}"
 }
 
+_parse_args() {
+	while getopts ":hd" opt; do
+		case ${opt} in
+			d ) set -x ;;
+			h ) usage ;;
+			\? ) usage "Invalid option: -$OPTARG" ;;
+		esac
+	done
+	shift $((OPTIND-1))
+}
+
 _print_status() {
 	printf "${NC}${GRN}  ***** %b${NC}" "$@"
 }
