@@ -6,6 +6,28 @@
 # Common functions used in my utility scripts
 ##
 
+_compress() {
+	local name=${1:?$(_null_var "$FUNCNAME")}
+	local file=${2:?$(_null_var "$FUNCNAME")}
+
+	tar zcf "${name}.tar.gz" "${file}"
+}
+
+_extract() {
+	local file=${1:?$(_null_var "$FUNCNAME")}
+	local ext=${file##*.}
+	local target
+
+	target="${PROGDIR}/caution"
+	mkdir -p "${target}"
+	case "${ext}" in
+		"tar"|"gz"|"xz") tar -xf "${file}" -C "${target}" ;;
+		"zst")           tar -I zstd -xvf archive.tar.zst ;;
+		*) _err_exit "Unsupported file extension — manually extract!" ;;
+	esac
+	_print_status "'${file}' extracted to: ${target}\n"
+}
+
 _err_exit() {
 	printf "${RED}ERROR/EXIT[$(date +'%Y-%m-%d %H:%M:%S')]: %b!\n${NC}" "$@" >&2
 	exit -1
@@ -37,6 +59,7 @@ _install_dependencies() {
 		'ncurses'
 		'perl'
 		'xclip'
+		'zstd'
 	)
 	local os i
 
@@ -129,7 +152,9 @@ _usage() {
 	local i option detail
 
 	echo "${YEL}${ITALIC}"
-	echo "  Synopsis: ${synopsis}" | perl -lpe 's/(.{56,}?)\s/$1\n\t    /g '
+	echo "  Synopsis: ${synopsis}" \
+		| sed 's/[[:space:]]\+/ /g' \
+		| perl -lpe 's/(.{56,}?)\s/$1\n\t   /g '
 	echo "${NC}${YEL}${BOLD}"
 	echo "  Usage: ${name} ${args}"
 	echo ""

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+##
+# rtar
+#
+# Automatic compression of directory to tar or extraction of tar file.
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+
+usage() {
+	local summary="Automatic compression of directory to tar or extraction of \
+		tar file."
+	local args="-f <FILE> [-n NAME] [-h] [-d]"
+	local options=(
+		"FILE: File. If file is compressed, it will be extracted to a tmp  \
+			directory to check if tar bomb. If file is a directory, it will \
+			be compressed."
+		"NAME: Optional. If file is a directory, the compressed file will be \
+			named this. Arg is ignored otherwise."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+check_args() {
+	local file=$1
+	local name_str=$2
+
+	if [[ ! -e ${file} ]]; then
+		usage "Bad -f '${file}' arg"
+	fi
+	if [[ -z ${name_str} ]]; then
+		name=${file##*/}
+	fi
+}
+
+parse_args() {
+	while getopts ":hf:n:d" opt; do
+		case ${opt} in
+			d ) set -x ;;
+			f ) file=$( realpath --relative-to="${PROGDIR}" "$OPTARG" ) ;;
+			n ) name=$OPTARG ;;
+			h ) usage ;;
+			\? ) usage "Invalid option: -$OPTARG" ;;
+		esac
+	done
+	shift $((OPTIND-1))
+}
+
+main() {
+	local file
+	local name
+
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	parse_args "${ARGS[@]}"
+	check_args "${file}" "${name}"
+	if [[ -d ${file} ]]; then
+		_compress "${name}" "${file}"
+	else
+		_extract "${file}"
+	fi
+}
+main
