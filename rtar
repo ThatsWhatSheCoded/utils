@@ -15,10 +15,10 @@ usage() {
 		tar file."
 	local args="-f <FILE> [-n NAME] [-h] [-d]"
 	local options=(
-		"FILE: File. If file is compressed, it will be extracted to a tmp  \
+		"-f FILE: File. If file is compressed, it will be extracted to a tmp  \
 			directory to check if tar bomb. If file is a directory, it will \
 			be compressed."
-		"NAME: Optional. If file is a directory, the compressed file will be \
+		"-n NAME: Optional. If file is a directory, the compressed file will be \
 			named this. Arg is ignored otherwise."
 		"-d: Enable debug mode. Warning: Extremely verbose."
 		"-h: Print usage."
