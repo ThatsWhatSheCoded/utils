@@ -9,6 +9,7 @@
 readonly ARGS=( "$@" )
 readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
 readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+readonly FILE=${1:-'.'}
 
 usage() {
 	local summary='Print absolute path to file and copy path to clipboard.'
@@ -36,27 +37,14 @@ check_args() {
 	fi
 }
 
-parse_args() {
-	file=${1:-'.'}
-	while getopts ":hd" opt; do
-		case ${opt} in
-			d ) set -x ;;
-			h ) usage ;;
-			\? ) usage "Invalid option: -$OPTARG" ;;
-		esac
-	done
-	shift $((OPTIND-1))
-}
-
 main() {
-	local file
 	local path
 
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
 	_set_colors
-	parse_args "${ARGS[@]}"
-	check_args "${file}"
+	_parse_args "${ARGS[@]}"
+	check_args "${FILE}"
 	realpath "${path}" | perl -pe 'chomp if eof' | xclip -selection clipboard
 	_print_status "path: ${path}\n"
 }
