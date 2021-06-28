@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+##
+# rcat
+#
+# Copy the contents of the file to the clipboard
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+readonly FILE=$1
+
+usage() {
+	local summary='Copy the contents of the file to the clipboard'
+	local args='<FILE> [-h] [-d]'
+	local options=(
+		"FILE: Filename."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+main() {
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	_parse_args "${ARGS[@]}"
+	if [[ ! -f ${FILE} ]]; then
+		_err_exit "bad file arg!"
+	fi
+	perl -pe 'chomp if eof' "${FILE}" | xclip -selection clipboard
+}
+main
