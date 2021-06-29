@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+##
+# 2do
+#
+# Open to-do list.
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+# Globals
+readonly FILE="${HOME}/mine/scripts/sandbox/2do.md"
+readonly O_EDIT=$1
+
+usage() {
+	local summary='Open to-do list in "read" or "edit" mode.'
+	local args='[-e] [-h] [-d]'
+	local options=(
+		"-e: Open file in edit mode instead of read-only mode. Creates a new \
+			bullet at beginning of file."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+check_args() {
+	local file=$1
+
+	if [[ ! -f ${file} ]]; then
+		_err_exit "To-do list file not in expected location: ${file}"
+	fi
+}
+
+main() {
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	_parse_args "${ARGS[@]}"
+	check_args "${FILE}"
+	if [[ -z ${O_EDIT} ]]; then
+		# Relies on the vimrc setting that opens a file at its last position
+		vim "${FILE}"
+	else
+		vim "+normal ggO " +startinsert "${FILE}"
+	fi
+}
+main
