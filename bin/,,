@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+##
+# ,,
+#
+# Print out number with commas for readability.
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+readonly NUM=$1
+
+usage() {
+	local summary="Print out number with commas for readability."
+	local args='<NUMBER> [-h] [-d]'
+	local options=(
+		"NUMBER: Number to print out with comma-separated thousandth places."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+comma_sep_num() {
+	local num=${1:?$(_null_var "$FUNCNAME")}
+
+	printf "%'d\n" "${num}"
+}
+
+check_args() {
+	local num=$1
+
+	if [[ -z ${num} ]]; then
+		usage "Must pass a NUMBER argument"
+	fi
+}
+
+main() {
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	_parse_args "${ARGS[@]}"
+	check_args "${NUM}"
+	comma_sep_num "${num}"
+}
+main
