@@ -25,14 +25,20 @@ usage() {
 	exit -1
 }
 
+check_args() {
+	local file=$1
+
+	if [[ ! -f ${file} ]]; then
+		_err_exit "bad file arg!"
+	fi
+}
+
 main() {
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
 	_set_colors
 	_parse_args "${ARGS[@]}"
-	if [[ ! -f ${FILE} ]]; then
-		_err_exit "bad file arg!"
-	fi
+	check_args "${FILE}"
 	perl -pe 'chomp if eof' "${FILE}" | xclip -selection clipboard
 }
 main
