@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+##
+# appendDate
+#
+# Append date to file name.
+#
+# Warning: Does not work for filenames that:
+#     * include version numbers (e.g. core-firmware-0.27.1.tar.gz)
+#     * contain multiple '.' characters (e.g. TimeSeriesData.test.ts)
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+
+usage() {
+	local summary='Append date (format: YYYY-MM-DD) to filename.'
+	local args='-f "<FILE|PATTERN>" [-n [+|-]DAYS] [-h] [-d]'
+	local options=(
+		"-f STR: Filename, file path, or name pattern. Warning: Arg has to be \
+			quoted."
+		"-n NUM: Number of days offset to today. Can be negative or positive. \
+			Default: 0 (so today's date will be appended)."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+append() {
+	local num=$1; shift
+	local files=( $@ )
+	local day i path name ext base new
+
+	day=$( date +%Y-%m-%d -d "${num} days" )
+	for i in "${files[@]}"; do
+		path=$( dirname "$(realpath "${i}")" )
+		name=${i##*/}
+		ext=${name#*.}    # only parse to first '.' in case of '*.tar.gz'
+		base=${name%%.*}
+		new="${base}-${day}"
+		[[ ${name} != "${ext}" ]] && new+=".${ext}"
+		_print_status "${i} -> ${new}\n"
+		mv -i "${i}" "${path}/${new}"
+	done
+}
+
+check_args() {
+	local num=$1; shift
+	local files=( $@ )
+	local i regex choice
+
+	regex='^[+-]?[0-9]+([.][0-9]+)?$'
+	if ! [[ ${num} =~ ${regex} ]]; then
+		_err_exit "Bad num days arg"
+	fi
+	# files checks
+	if [[ ${#files[@]} -eq 1 ]]; then
+		_print_warn "Warning: Only 1 file match!\n"
+		_print_warn "Did you remember to quote the arg?\n"
+		read -p "Continue?(y/n): " choice
+		if [[ -z ${choice} || ${choice} == "n" ]]; then
+			echo "Exiting..."
+			exit -1
+		fi
+	fi
+	for i in "${files[@]}"; do
+		[[ -f ${i} ]] || _print_warn "Warning: File '${i}' does not exist!\n"
+	done
+}
+
+parse_args() {
+	if [[ $@ == *'*'* ]]; then
+		_print_warn "Warning: -f arg contains '*'! Pattern-matching now...\n"
+	fi
+	while getopts ":hdf:n:" opt; do
+		case ${opt} in
+			d ) set -x ;;
+			h ) usage ;;
+			f ) files=( $OPTARG ) ;;
+			n ) num=$OPTARG ;;
+			\? ) usage "Invalid option: -$OPTARG" ;;
+		esac
+	done
+	shift $((OPTIND-1))
+}
+
+main() {
+	local num=0    # The number of days offset from today
+	local files
+
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	parse_args "${ARGS[@]}"
+	check_args "${num}" "${files[@]}"
+	append "${num}" "${files[@]}"
+}
+main
