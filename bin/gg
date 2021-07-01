@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+##
+# gg
+#
+# Grep for the string in current directory. Populate location list in vim with
+# the results.
+##
+
+readonly ARGS=( "$@" )
+readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
+readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+
+usage() {
+	local summary="Grep for the string in current directory. Populate \
+		location list in vim with the results."
+	local args='<STR> [-h] [-d]'
+	local options=(
+		"STR: String to grep recursively."
+		"-d: Enable debug mode. Warning: Extremely verbose."
+		"-h: Print usage."
+	)
+
+	_usage "${summary}" "${PROGNAME}" "${args}" "${options[@]}"
+	[[ -n $1 ]] && _err_exit "$@"
+	exit -1
+}
+
+get_matches() {
+	matches=(
+		"$( grep -rnH \
+			--exclude-dir='node_modules' \
+			--exclude='package-lock.json' \
+			--exclude='tags' \
+			--exclude='yarn.lock' \
+			"${ARGS[@]}" \
+			| sed 's/\([^ ]\):[[:space:]]\+\(.*\)/\1: \2/g'
+		)"
+	)
+}
+
+parse_args() {
+	while getopts ":h" opt; do
+		case ${opt} in
+			h ) usage ;;
+			\? ) usage "Invalid option: -$OPTARG" ;;
+		esac
+	done
+	shift $((OPTIND-1))
+}
+
+main() {
+	local matches
+	local num
+
+	source "${PROGDIR}/common.sh"
+	_install_dependencies
+	_set_colors
+	parse_args "${ARGS[@]}"
+	get_matches
+	num=$( echo "${matches[@]}" | wc -l )
+	if [[ ${num} -eq 0 ]]; then
+		_err_exit "No matches found"
+	fi
+	echo "${matches[@]}" | vim -
+}
+main
