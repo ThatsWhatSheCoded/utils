@@ -30,6 +30,8 @@ get_matches() {
 	matches=(
 		"$( grep -rnH \
 			--exclude-dir='node_modules' \
+			--exclude-dir='.git' \
+			--exclude-dir='.mypy_cache' \
 			--exclude='package-lock.json' \
 			--exclude='tags' \
 			--exclude='yarn.lock' \
