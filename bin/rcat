@@ -39,6 +39,10 @@ main() {
 	_set_colors
 	_parse_args "${ARGS[@]}"
 	check_args "${FILE}"
-	perl -pe 'chomp if eof' "${FILE}" | xclip -selection clipboard
+	if [[ `uname -s` == "Darwin" ]]; then
+		perl -pe 'chomp if eof' "${FILE}" | pbcopy
+	else
+		perl -pe 'chomp if eof' "${FILE}" | xclip -selection clipboard
+	fi
 }
 main

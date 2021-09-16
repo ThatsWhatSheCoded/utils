@@ -27,7 +27,7 @@ usage() {
 }
 
 main() {
-	local name='/tmp/temp'
+	local file='/tmp/temp'
 
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
@@ -36,7 +36,7 @@ main() {
 	if [[ -n ${FILETYPE} ]]; then
 		file="${file}.${FILETYPE}"
 	fi
-	>"${name}"
-	vim "${name}"
+	>"${file}"
+	vim "${file}"
 }
 main

@@ -45,7 +45,11 @@ main() {
 	_set_colors
 	_parse_args "${ARGS[@]}"
 	check_args "${FILE}"
-	realpath "${path}" | perl -pe 'chomp if eof' | xclip -selection clipboard
+	if [[ `uname -s` == "Darwin" ]]; then
+		realpath "${path}" | perl -pe 'chomp if eof' | pbcopy 
+	else
+		realpath "${path}" | perl -pe 'chomp if eof' | xclip -selection clipboard
+	fi
 	_print_status "path: ${path}\n"
 }
 main

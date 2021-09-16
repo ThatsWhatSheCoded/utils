@@ -30,7 +30,7 @@ _extract() {
 
 _err_exit() {
 	printf "${RED}ERROR/EXIT[$(date +'%Y-%m-%d %H:%M:%S')]: %b!\n${NC}" "$@" >&2
-	exit -1
+	exit 1
 }
 
 _get_os() {
@@ -83,12 +83,23 @@ _install_pkg() {
 _is_installed() {
 	local os=$1
 	local name=$2
+	local brewCellar="/usr/local/Cellar"
 
 	case "${os}" in
-		"Darwin") brew list "${name}" &>/dev/null ;;
+		# Note: `brew list NAME` takes too long (>1sec/each); check
+		# cellar for package instead
+		"Darwin") [[ -e "${brewCellar}/${name}" ]] ;;
 		"CentOS") rpm -q "${name}" &>/dev/null ;;
 		"Ubuntu") dpkg -l "${name}" &>/dev/null ;;
 	esac
+}
+
+_list_files() {
+	if [[ `uname -s` == 'Darwin' ]]; then
+		ls -G
+	else
+		ls --color=always
+	fi
 }
 
 _null_var() {
@@ -143,6 +154,27 @@ _set_colors() {
 	fi
 }
 
+_update_ps1() {
+	local p1="\[\e[33m\]\w"
+	local p1
+	local stack branch
+
+	# stack=$(_get_stack_count)
+	# _in_git_repo && branch=$(_get_branch_name)
+	# if [[ -n ${branch} ]]; then
+		# # p1+="\[\e[0m\] on"
+		# if _is_repo_clean; then
+			# p1+=" \[\e[32m\]\[\e[0m\]\[\e[32m\] "
+		# else
+			# p1+=" \[\e[31m\]\[\e[0m\]\[\e[31m\]"
+		# fi
+		# # p1+=" ${branch}\[\e[0m\]"
+	# fi
+	# [[ ${stack} -ne 1 ]] && p1+="\[ ≡\]"
+	p1+=" \[\e[32m\]→ \[\e[0m\]"
+	export PS1="${p1}"
+}
+
 _usage() {
 	local synopsis=$1
 	local name=$2
@@ -169,3 +201,9 @@ _usage() {
 	done
 	echo "${NC}"
 }
+
+#######
+# GIT #
+#######
+# Assumption: Already cd-ed into git repo
+

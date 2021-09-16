@@ -10,7 +10,7 @@ readonly ARGS=( "$@" )
 readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
 readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
 # Globals
-readonly FILE="${HOME}/mine/scripts/sandbox/2do.md"
+readonly FILE="${HOME}/mine/Scripts/sandbox/2do.md"
 readonly O_EDIT=$1
 
 usage() {
