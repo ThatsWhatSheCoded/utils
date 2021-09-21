@@ -56,22 +56,21 @@ main() {
 	local matches
 	local num
 
-	set -x
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
 	_set_colors
 	parse_args "${ARGS[@]}"
 	get_matches
-	# Note: `num=${#matches[@]}` == 1 based on the janky way we're parsing the
-	# array, so use `wc -l`
+	# Note: `num=${#matches[@]}` == 1 based on the suboptimal way we're parsing the
+	# array, so use `wc -l` for now
 	num=$( wc -l <<< "${matches[@]}" )
 	if [[ ${num} -eq 0 ]]; then
 		_err_exit "No matches found"
 	fi
 	# Note: `echo "${matches[@]}" | vim -` doesn't work as expected on macOS —
 	# it is creating a temp buffer that we can't jump back to with <C-^>
-	# Working solution: Populate the quickfix list with ${matches[@]}
-	# vim -c "cexpr \"${matches[*]}\" | copen | call setreg('/', \"${SEARCH}\") | se hls"
+	# Working solution: Populate the location list with ${matches[@]} instead
+	# of quickfix list so that 'ale' and misc bundle plugins are not affected
 	vim -c "lexpr \"${matches[*]}\" | lopen | call setreg('/', \"${SEARCH}\") | se hls"
 }
 main
