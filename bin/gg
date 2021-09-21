@@ -10,14 +10,15 @@
 readonly ARGS=( "$@" )
 readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
 readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
+readonly SEARCH=$1
+FILE=$2
 
 usage() {
 	local summary="Grep for the string in current directory. Populate \
 		location list in vim with the results."
-	local args='<STR> [-h] [-d]'
+	local args='<STR> [-h] [FILE]'
 	local options=(
 		"STR: String to grep recursively."
-		"-d: Enable debug mode. Warning: Extremely verbose."
 		"-h: Print usage."
 	)
 
@@ -55,16 +56,22 @@ main() {
 	local matches
 	local num
 
+	set -x
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
 	_set_colors
 	parse_args "${ARGS[@]}"
 	get_matches
-	# num=$( echo "${matches[@]}" | wc -l )
-	num=${#matches[@]}
+	# Note: `num=${#matches[@]}` == 1 based on the janky way we're parsing the
+	# array, so use `wc -l`
+	num=$( wc -l <<< "${matches[@]}" )
 	if [[ ${num} -eq 0 ]]; then
 		_err_exit "No matches found"
 	fi
-	echo "${matches[@]}" | vim -
+	# Note: `echo "${matches[@]}" | vim -` doesn't work as expected on macOS —
+	# it is creating a temp buffer that we can't jump back to with <C-^>
+	# Working solution: Populate the quickfix list with ${matches[@]}
+	# vim -c "cexpr \"${matches[*]}\" | copen | call setreg('/', \"${SEARCH}\") | se hls"
+	vim -c "lexpr \"${matches[*]}\" | lopen | call setreg('/', \"${SEARCH}\") | se hls"
 }
 main
