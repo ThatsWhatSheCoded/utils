@@ -52,6 +52,10 @@ _get_os() {
 	fi
 }
 
+_get_stack_count() {
+	dirs -v | wc -l
+}
+
 _install_dependencies() {
 	local pkgs=(
 		'coreutils'
@@ -159,18 +163,18 @@ _update_ps1() {
 	local p1
 	local stack branch
 
-	# stack=$(_get_stack_count)
-	# _in_git_repo && branch=$(_get_branch_name)
-	# if [[ -n ${branch} ]]; then
-		# # p1+="\[\e[0m\] on"
-		# if _is_repo_clean; then
-			# p1+=" \[\e[32m\]\[\e[0m\]\[\e[32m\] "
-		# else
-			# p1+=" \[\e[31m\]\[\e[0m\]\[\e[31m\]"
-		# fi
-		# # p1+=" ${branch}\[\e[0m\]"
-	# fi
-	# [[ ${stack} -ne 1 ]] && p1+="\[ ≡\]"
+	stack=$(_get_stack_count)
+	_in_git_repo && branch=$(_get_branch_name)
+	if [[ -n ${branch} ]]; then
+		# p1+="\[\e[0m\] on"
+		if _is_repo_clean; then
+			p1+=" \[\e[32m\]\[\e[0m\]\[\e[32m\] "
+		else
+			p1+=" \[\e[31m\]\[\e[0m\]\[\e[31m\]"
+		fi
+		# p1+=" ${branch}\[\e[0m\]"
+	fi
+	[[ ${stack} -ne 1 ]] && p1+="\[ ≡\]"
 	p1+=" \[\e[32m\]→ \[\e[0m\]"
 	export PS1="${p1}"
 }
@@ -186,7 +190,7 @@ _usage() {
 	echo "${YEL}${ITALIC}"
 	echo "  Synopsis: ${synopsis}" \
 		| sed 's/[[:space:]]\+/ /g' \
-		| perl -lpe 's/(.{56,}?)\s/$1\n\t   /g '
+		| perl -lpe 's/(.{56,}?)\s/$1\n\t    /g '
 	echo "${NC}${YEL}${BOLD}"
 	echo "  Usage: ${name} ${args}"
 	echo ""
@@ -207,3 +211,15 @@ _usage() {
 #######
 # Assumption: Already cd-ed into git repo
 
+_get_branch_name() {
+	git branch &>/dev/null && git branch --show-current
+}
+
+_in_git_repo() {
+	git rev-parse --is-inside-work-tree &>/dev/null
+}
+
+_is_repo_clean() {
+	local changes=$( git status -s | wc -l )
+	[[ ${changes} -eq 0 ]]
+}
