@@ -166,13 +166,11 @@ _update_ps1() {
 	stack=$(_get_stack_count)
 	_in_git_repo && branch=$(_get_branch_name)
 	if [[ -n ${branch} ]]; then
-		# p1+="\[\e[0m\] on"
 		if _is_repo_clean; then
 			p1+=" \[\e[32m\]\[\e[0m\]\[\e[32m\] "
 		else
 			p1+=" \[\e[31m\]\[\e[0m\]\[\e[31m\]"
 		fi
-		# p1+=" ${branch}\[\e[0m\]"
 	fi
 	[[ ${stack} -ne 1 ]] && p1+="\[ ≡\]"
 	p1+=" \[\e[32m\]→ \[\e[0m\]"
