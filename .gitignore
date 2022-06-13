@@ -1,3 +1,5 @@
 # Editor configurations
 .vscode/
 tags
+
+.DS_Store
