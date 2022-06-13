@@ -159,21 +159,20 @@ _set_colors() {
 }
 
 _update_ps1() {
-	local p1="\[\e[33m\]\w"
-	local p1
-	local stack branch
+	local p1='\[\e[33m\]\w '
+	local stack
 
-	stack=$(_get_stack_count)
-	_in_git_repo && branch=$(_get_branch_name)
-	if [[ -n ${branch} ]]; then
+	if _in_git_repo; then
 		if _is_repo_clean; then
-			p1+=" \[\e[32m\]\[\e[0m\]\[\e[32m\] "
+			p1+='\[\e[32m\] '
 		else
-			p1+=" \[\e[31m\]\[\e[0m\]\[\e[31m\]"
+			p1+='\[\e[31m\] '
 		fi
 	fi
-	[[ ${stack} -ne 1 ]] && p1+="\[ ≡\]"
-	p1+=" \[\e[32m\]→ \[\e[0m\]"
+	stack=$(_get_stack_count)
+	[[ ${stack} -ne 1 ]] && p1+='\[\e[34m\]🥞 '
+	p1+='\[\e[32m\]→ '
+	[[ ${stack} -ne 1 ]] && p1+='  ' # note: required for emoji spacewidth
 	export PS1="${p1}"
 }
 
@@ -209,15 +208,53 @@ _usage() {
 #######
 # Assumption: Already cd-ed into git repo
 
+_branch_exists() {    # 1 (exist) or 0 (does not exist)
+	local url=$1
+	local branch=$2
+	git ls-remote --heads "${url}" "${branch}" 2>/dev/null | wc -l
+}
+
+_branch_exists_detailed() {    # 1 (exist) or 0 (does not exist)
+	local owner=$1
+	local repo=$2
+	local branch_name=$3
+	git ls-remote \
+		--heads \
+		git@github.com:${owner}/${repo}.git \
+		"${branch_name}" | wc -l
+}
+
+_clone_branch() {
+	local git_url=${1:?`_null_var $FUNCNAME`}
+	local branch=${2:?`_null_var $FUNCNAME`}
+	local dir_name=${3:?`_null_var $FUNCNAME`}
+
+	git clone -b "${branch}" --single-branch "${git_url}" "${dir_name}"
+}
+
 _get_branch_name() {
-	git branch &>/dev/null && git branch --show-current
+	git branch --show-current
 }
 
 _in_git_repo() {
 	git rev-parse --is-inside-work-tree &>/dev/null
 }
 
+_is_detached_branch() {
+	git branch | grep '^*' | grep -q "HEAD detached"
+}
+
 _is_repo_clean() {
 	local changes=$( git status -s | wc -l )
 	[[ ${changes} -eq 0 ]]
+}
+
+_pull_branch() {     # Pull specific branch. Default: current branch
+	local branch=${1:-`_get_branch_name`}
+	git pull origin "${branch}"
+}
+
+_push_branch() {     # Push specific branch. Default: current branch
+	local branch=${1:-`_get_branch_name`}
+	git push origin "${branch}"
 }

@@ -15,8 +15,7 @@ usage() {
 	local summary="Create scratchwork file of the specified type in /tmp/"
 	local args='[FILETYPE] [-h] [-d]'
 	local options=(
-		"FILETYPE: Filetype. Optional. If no arg is passed, file will have \
-			no extension."
+		"FILETYPE: Filetype. Optional. If no arg is passed, file will have no extension."
 		"-d: Enable debug mode. Warning: Extremely verbose."
 		"-h: Print usage."
 	)
