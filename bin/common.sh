@@ -90,9 +90,7 @@ _is_installed() {
 	local brewCellar="/usr/local/Cellar"
 
 	case "${os}" in
-		# Note: `brew list NAME` takes too long (>1sec/each); check
-		# cellar for package instead
-		"Darwin") [[ -e "${brewCellar}/${name}" ]] ;;
+		"Darwin") brew list "${name}" &>/dev/null ;;
 		"CentOS") rpm -q "${name}" &>/dev/null ;;
 		"Ubuntu") dpkg -l "${name}" &>/dev/null ;;
 	esac
