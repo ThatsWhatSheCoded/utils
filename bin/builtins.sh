@@ -36,6 +36,30 @@ function cd() {
 	_list_files
 }
 
+function pushd() {
+	local step='../'
+	local level i dest
+
+	if [[ -d "$@" || $# -eq 0 || "$@" == '-' || "$@" == '.' ]]; then
+		builtin pushd "$@"
+	else
+		if [[ -f $@ ]]; then     # if arg is a file -- go into its directory
+			dest=$( dirname "$@" )
+		else
+			level=${@//\.*/}
+			if [[ ${level} != [0-9] ]]; then
+				_err_msg "Invalid pushd argument \"$@\""
+				return
+			fi
+			for (( i=0; i<${level}; i++ )); do
+				dest+="${step}"
+			done
+		fi
+		builtin pushd "${dest}"
+	fi
+	_list_files
+}
+
 function cp() {
 	command cp "$@"
 	_list_files
