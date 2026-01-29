@@ -87,13 +87,22 @@ _install_pkg() {
 _is_installed() {
 	local os=$1
 	local name=$2
-	local brewCellar="/usr/local/Cellar"
+	# local brewCellar="/usr/local/Cellar"
+	local brewCellar="/opt/homebrew/Cellar"
 
 	case "${os}" in
-		"Darwin") brew list "${name}" &>/dev/null ;;
+		# "Darwin") brew list "${name}" &>/dev/null ;;
+		# "Darwin") brew ls --versions "${name}" &>/dev/null ;;
+		"Darwin") [[ -d ${brewCellar}/${name} ]] &>/dev/null ;;
 		"CentOS") rpm -q "${name}" &>/dev/null ;;
 		"Ubuntu") dpkg -l "${name}" &>/dev/null ;;
 	esac
+}
+
+_file_exists() {
+	local file=${1:?$(_null_var "$FUNCNAME")}
+
+	[[ -e ${file} ]] || _err_exit "File '${file}' does not exist"
 }
 
 _list_files() {
@@ -127,6 +136,10 @@ _print_warn() {
 	printf "${NC}${YEL}  ***** %b${NC}" "$@"
 }
 
+_err_msg() {
+	printf "${NC}${RED}  ***** %b${NC}\n" "$@"
+}
+
 _set_colors() {
 	local hues=( "RED" "GRN" "YEL" "BLU" "MAG" "CYN" "WHT" "ORG" "NC" "CLR" )
 
@@ -154,6 +167,12 @@ _set_colors() {
 		LT_BLU=$(tput sgr0; tput setaf 12)
 		NC=$(tput sgr0)
 	fi
+}
+
+_remove_blank_lines() {
+	local content=$1
+
+	sed '/^$/d' <<< "${content}"
 }
 
 _update_ps1() {

@@ -25,6 +25,7 @@ function cd() {
 			level=${@//\.*/}
 			if [[ ${level} != [0-9] ]]; then
 				_err_msg "Invalid cd argument \"$@\""
+				_err_msg "Likely bad filepath."
 				return
 			fi
 			for (( i=0; i<${level}; i++ )); do
@@ -38,9 +39,11 @@ function cd() {
 
 function pushd() {
 	local step='../'
-	local level i dest
+	local level i dest first_arg first_char
 
-	if [[ -d "$@" || $# -eq 0 || "$@" == '-' || "$@" == '.' ]]; then
+	first_arg=${@:0:1}
+	first_char=${first_arg:0:1}
+	if [[ -d "$@" || $# -eq 0 || "$@" == '-' || "$@" == '.' || ${first_char} == '+' || ${first_char} == '-' ]]; then
 		builtin pushd "$@"
 	else
 		if [[ -f $@ ]]; then     # if arg is a file -- go into its directory

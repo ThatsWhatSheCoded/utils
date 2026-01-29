@@ -19,9 +19,9 @@ usage() {
 	local args='-f "<FILE|PATTERN>" [-n [+|-]DAYS] [-h] [-d]'
 	local options=(
 		"-f STR: Filename, file path, or name pattern. Warning: Arg has to be \
-			quoted."
+quoted."
 		"-n NUM: Number of days offset to today. Can be negative or positive. \
-			Default: 0 (so today's date will be appended)."
+Default: 0 (so today's date will be appended)."
 		"-d: Enable debug mode. Warning: Extremely verbose."
 		"-h: Print usage."
 	)

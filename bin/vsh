@@ -3,19 +3,20 @@
 ##
 # vsh
 #
-# Create shell script with name; automatically set file to be executable.
+# Create script with name; automatically set file to be executable.
 ##
 
 readonly ARGS=( "$@" )
 readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
 readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
-readonly NAME=$1
+# readonly NAME=$1
 
 usage() {
-	local summary="Create executable shell script named 'NAME.sh'"
-	local args='<NAME> [-h] [-d]'
+	local summary="Create executable script named '<NAME>.<FILETYPE>'"
+	local args='<NAME> <FILETYPE> [-h] [-d]'
 	local options=(
-		"NAME: Script name. '.sh' file extension is automatically appended."
+		"NAME: Script name"
+		"FILETYPE: File type. Default: sh"
 		"-d: Enable debug mode. Warning: Extremely verbose."
 		"-h: Print usage."
 	)
@@ -33,25 +34,28 @@ create_file() {
 }
 
 check_args() {
-	local name_str=$1
+	local base=$1
+	local ext=$2
 
-	if [[ -z ${name_str} ]]; then
-		usage "Must pass -n <NAME> arg"
+	if [[ -z ${base} ]]; then
+		usage "Must pass <NAME> arg"
 	fi
-	name="${name_str}.sh"
-	if [[ -f ${name} ]]; then
-		_err_exit "File '${name}' already exists"
+	filename="${base}.${ext}"
+	if [[ -f ${filename} ]]; then
+		_err_exit "File '${filename}' already exists"
 	fi
 }
 
 main() {
-	local name
+	local base=$1
+	local ext=${2-'sh'}
+	local filename
 
 	source "${PROGDIR}/common.sh"
 	_install_dependencies
 	_set_colors
 	_parse_args "${ARGS[@]}"
-	check_args "${NAME}"
-	create_file "${name}"
+	check_args "${base}" "${ext}"
+	create_file "${filename}"
 }
-main
+main "$@"

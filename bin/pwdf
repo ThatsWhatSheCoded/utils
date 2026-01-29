@@ -39,14 +39,16 @@ check_args() {
 
 main() {
 	local path
+	local os
 
 	source "${PROGDIR}/common.sh"
-	_install_dependencies
+	# _install_dependencies
 	_set_colors
 	_parse_args "${ARGS[@]}"
 	check_args "${FILE}"
-	if [[ `uname -s` == "Darwin" ]]; then
-		realpath "${path}" | perl -pe 'chomp if eof' | pbcopy 
+	os=$( uname -s )
+	if [[ ${os} == "Darwin" ]]; then
+		realpath "${path}" | perl -pe 'chomp if eof' | pbcopy
 	else
 		realpath "${path}" | perl -pe 'chomp if eof' | xclip -selection clipboard
 	fi

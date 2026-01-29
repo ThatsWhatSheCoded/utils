@@ -14,8 +14,8 @@ readonly SEARCH=$1
 FILE=$2
 
 usage() {
-	local summary="Grep for the string in current directory. Populate \
-		location list in vim with the results."
+	local summary="Grep for the string in current directory. Populate location \
+list in vim with the results."
 	local args='<STR> [-h] [FILE]'
 	local options=(
 		"STR: String to grep recursively."

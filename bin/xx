@@ -12,7 +12,7 @@ readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
 readonly FILETYPE=$1
 
 usage() {
-	local summary="Create scratchwork file of the specified type in /tmp/"
+	local summary='Create scratchwork file of the specified type in /tmp/'
 	local args='[FILETYPE] [-h] [-d]'
 	local options=(
 		"FILETYPE: Filetype. Optional. If no arg is passed, file will have no extension."

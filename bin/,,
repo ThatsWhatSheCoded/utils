@@ -12,7 +12,7 @@ readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
 readonly NUM=$1
 
 usage() {
-	local summary="Print out number with commas for readability."
+	local summary='Print out number with commas for readability.'
 	local args='<NUMBER> [-h] [-d]'
 	local options=(
 		"NUMBER: Number to print out with comma-separated thousandth places."

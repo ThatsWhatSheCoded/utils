@@ -11,15 +11,13 @@ readonly PROGNAME=$(basename "${BASH_SOURCE[0]}")
 readonly PROGDIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")" )
 
 usage() {
-	local summary="Automatic compression of directory to tar or extraction of \
-		tar file."
-	local args="-f <FILE> [-n NAME] [-h] [-d]"
+	local summary='Automatic compression of directory to tar or extraction of tar file.'
+	local args='-f <FILE> [-n NAME] [-h] [-d]'
 	local options=(
-		"-f FILE: File. If file is compressed, it will be extracted to a tmp  \
-			directory to check if tar bomb. If file is a directory, it will \
-			be compressed."
+		"-f FILE: File. If file is compressed, it will be extracted to a tmp \
+directory to check if tar bomb. If file is a directory, it will be compressed."
 		"-n NAME: Optional. If file is a directory, the compressed file will be \
-			named this. Arg is ignored otherwise."
+named this. Arg is ignored otherwise."
 		"-d: Enable debug mode. Warning: Extremely verbose."
 		"-h: Print usage."
 	)
